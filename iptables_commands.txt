@@ -4,11 +4,14 @@
 
 ## find IP address in each VM
 ip addr
+# VM1 = 10.0.2.15
+# VM2 = 10.0.2.3
 
 ## make sure sshd is installed in each VM and
 ## you can ssh from each VM to the other
 
 ssh account@otherIPAddress
+# can confirm i can ssh into the other vm from both
 
 
 VM1
