@@ -19,10 +19,13 @@ VM1
 # Let's see what iptable rules are already in place
 # for the filter table
 iptables -L -n -v --line-numbers
+# says that i need to be root, which makes sense since i dont think you would want anyone to be able to access your iptables
 
 sudo bash
+# this is good to know
 
 iptables -L -n -v --line-numbers
+# this is pretty cool, get to see all of the information for the iptables
 
 
 
@@ -36,9 +39,13 @@ iptables -L -n -v --line-numbers
 ssh account@otherIPAddress  # VM2
 ssh punetid@64.59.225.81 # zeus
 
+# it looks like it worked, after trying to ssh into them, they were both just left hanging
+
 
 # delete the rule we just added
 iptables -D OUTPUT 1
+
+#tried to ssh again, and now it works
 
 
 # just block access to the Other VM via ssh
@@ -47,6 +54,8 @@ iptables -A OUTPUT -p tcp --dport 22 -d otherIPAddress -j DROP
 
 ssh account@otherIPAddress  # VM2
 ssh punetid@64.59.225.81 # zeus
+
+# very cool, only ssh to vm2 was blocked
 
 
 # block access to zeus via ssh
@@ -111,8 +120,11 @@ iptables -A OUTPUT -p tcp --sport 22 -m cgroup ! --path system.slice/sshd.servic
 
 # test
 ssh otherVMIPAddr
+# wow this is really interesting because this looks very similar to what it was like to just block the connection, but now we allow it, log it, and drop it so it acts just like blocking
+
 # test
 ssh punetid@64.59.225.81 # zeus 
+# like i expected, it works
 
 #  Flush all the newly added rules
 iptables -F OUTPUT
