@@ -99,8 +99,11 @@ iptables -L -n -v --line-numbers
 
 # test
 ssh otherVMIPAddr
+# wow this is really interesting because this looks very similar to what it was like to just block the connection, but now we allow it, log it, and drop it so it acts just like blocking
+
 # test
 ssh punetid@64.59.225.81 # zeus 
+# like i expected, it works
 
 # Flush all the newly added rules
 iptables -F OUTPUT
@@ -113,6 +116,7 @@ telnet 127.0.0.1 8008
 
 # application based filtering
 # does this work?
+# does not work because installed version uses nftables which does not include cgroup, would have to switch to iptables-legacy
 
 iptables -A OUTPUT -p tcp --sport 22 -m cgroup ! --path system.slice/sshd.service -j LOG --log-prefix "DROP from port 22" --log-tcp-sequence --log-level 7
 iptables -A OUTPUT -p tcp --sport 22 -m cgroup ! --path system.slice/sshd.service -j DROP
@@ -120,11 +124,9 @@ iptables -A OUTPUT -p tcp --sport 22 -m cgroup ! --path system.slice/sshd.servic
 
 # test
 ssh otherVMIPAddr
-# wow this is really interesting because this looks very similar to what it was like to just block the connection, but now we allow it, log it, and drop it so it acts just like blocking
 
 # test
 ssh punetid@64.59.225.81 # zeus 
-# like i expected, it works
 
 #  Flush all the newly added rules
 iptables -F OUTPUT
@@ -136,12 +138,15 @@ iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 2222 -j REDIRECT --to-port 
 
 # In other VM
 ssh punetid@VM_1_IPAddr -p 2222
+#says connection refused
 
 # Let's see what is going on. Run wireshark in both VMs to see both ends of
 # the packet traffic. (can you find a packet in VM2 that is from port 22 in VM1?)
 
 wireshark
 filter: tcp.port==22 || tcp.port==2222
+
+# ------------------- stuck here -------------------------------------------------------
 
 # In other VM
 ssh punetid@VM_1_IPAddr -p 2222
