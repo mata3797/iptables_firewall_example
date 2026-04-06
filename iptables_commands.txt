@@ -131,6 +131,7 @@ ssh punetid@64.59.225.81 # zeus
 #  Flush all the newly added rules
 iptables -F OUTPUT
 
+# ------------------- stuck here begin -------------------------------------------------------
 
 # Let's rewrite the PORT in an incoming packet.
 iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 2222 -j REDIRECT --to-port 22
@@ -146,10 +147,10 @@ ssh punetid@VM_1_IPAddr -p 2222
 wireshark
 filter: tcp.port==22 || tcp.port==2222
 
-# ------------------- stuck here -------------------------------------------------------
-
 # In other VM
 ssh punetid@VM_1_IPAddr -p 2222
+
+# i think i got it, see screenshots
 
 # drop that rule
 iptables -t nat -D PREROUTING 1
@@ -165,8 +166,15 @@ ssh punetid@otherVM -p 2223
 
 ssh punetid@64.59.225.81 -p 2223 # zeus
 
+# i tried both for these on vm 1 with the rule, and they did not block anything, i can tell that it hit the rule, but it is not getting picked up in wireshark. going to try to see if ai has anything to say about this and try on the second vm.
+# tried on the second vm without the rule on it, and it refused the connection and got wireshark traffic, but nothing with using port 22, going to see why
+# it is saying to try using DNAT for vm to vm stuff, says that REDIRECT gets it from your vm to your host machine.
+# tried using this: iptables -t nat -A OUTPUT -p tcp -d 10.0.2.15 --dport 2223 -j DNAT --to-destination 10.0.2.15:22; same result
+
 # Delete that rule
 iptables -t nat -D OUTPUT 1
+
+# ------------------- stuck here end -------------------------------------------------------
 
 # simple firewall to ONLY allow SSH in and out
 # adapted from:
@@ -182,17 +190,23 @@ iptables -L -n -v --line-numbers
 # test
 ssh punetid@zeus.cs.pacificu.edu
 
+# this did not work, it said that ssh could not resolve this, temp failure in name resolution
+
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
 iptables -A INPUT -p tcp -s 0/0 --sport 22  -j ACCEPT
 iptables -A OUTPUT -p tcp -d 0/0 --dport 22  -j ACCEPT
 
+# THIS IS SO COOOOOOOOOOOOL
+
 
 # test
 ssh punetid@64.59.225.81
 ssh punetid@zeus.cs.pacificu.edu
 dig zeus.cs.pacificu.edu
+
+# ip address works, but DNS is blocked
 
 # allow DNS traffic through the firewall
 iptables -A INPUT -p udp -s 0/0 --sport 53  -j ACCEPT
@@ -203,6 +217,8 @@ iptables -A OUTPUT -p udp -d 0/0 --dport 53  -j ACCEPT
 ssh punetid@64.59.225.81
 ssh punetid@zeus.cs.pacificu.edu
 dig zeus.cs.pacificu.edu
+
+# they all worked! woohoo!
 
 
 # reset
