@@ -234,18 +234,32 @@ iptables -P FORWARD ACCEPT
 ### Test this by running ssh punetid@VM2.
 ### Does that work? What errors do you run into?
 
+# this did not work, it came up with an error warning that there was changes made, and that the remote host identification has changed; this is the command that i ran:
+# iptables -t nat -A OUTPUT -p tcp -d 10.0.2.3 --dport 22 -j DNAT --to-destination 64.59.225.81:22
+
 ## Delete that rule
 
 ## rewrite all packets going to VM2 to go to Zeus.
 ### test by opening http://VM2_IPAddress in firefox
+# this took me to the https://www.pacificu.edu/computer-science page
 ### test by ssh punetid@vm2
+# this still blocks it and says that there is a possible MITM attack happening
 
 ## Why can you not use the DNS name (zeus.cs.pacificu.edu) in the iptables command?
+# well from previous parts of this lab, i would assume that you have to allow port 53 in order to access the dns functions like domain lookup and stuff like that. without allowing port 53 (dns) you do not have access to that stuff.
 
 
 ## Reset iptables back it is original state.
 ## Use the uncomplicated firewall (ufw) in Ubuntu to write rules in VM1 that:
+ufw enable
 ### will block all incoming connections from VM2.
+ufw deny from 10.0.2.3
 ### will block all outgoing connections from VM1 to zeus. (should block http/https/ssh).
+ufw deny out to 64.59.225.81
+
+#then i deleted all the rules before turning off firewall again
+ufw delete deny from 10.0.2.3
+ufw delete deny out to 64.59.225.81
+ufw disable
 
 https://ubuntu.com/server/docs/how-to/security/firewalls/#ufw-uncomplicated-firewall
